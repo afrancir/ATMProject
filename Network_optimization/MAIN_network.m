@@ -2,12 +2,38 @@ clc
 clear all
 close all
 
-AIRPORTS    = load(strcat(pwd,'/AIRPORTS/AIRPORTS_coord.txt'));
+%%## Arnau 2/3/2017 - adaptation for diff. OS //Start
+OSTypeString = {'win' ,'lin'};
+winOrLin = input('Please press "1" for a Windows OS or "2" for a Linux-based OS \n');
+if (winOrLin==1 || winOrLin==2)
+    OS = OSTypeString(winOrLin);
+else 
+    msg ='This is not a valid option. 1 for Win or 2 for Linux';
+    error(msg)
+end 
+
+
+if strcmp(winOrLin,'win')
+    AIRPORTS    = load(strcat(pwd,'\AIRPORTS\AIRPORTS_coord.txt'));
+else
+    AIRPORTS    = load(strcat(pwd,'/AIRPORTS/AIRPORTS_coord.txt'));
+end 
+%%## Arnau 2/3/2017 - adaptation for diff. OS //End
+
 airport_ID = AIRPORTS(:,1);
 
+%%## Arnau 2/4/2017 - comment
+%For this example only focusing on departures from this_airport:
 this_airport = 34;
 
-Network = load(strcat(pwd,'/Internal_flights/NETWORK/INT_AggRoutes_timestep/',num2str(this_airport),'/',num2str(this_airport),'.txt'));
+if strcmp(winOrLin,'win')
+    Network = load(strcat(pwd,'\Internal_flights\NETWORK\INT_AggRoutes_timestep\'...
+        ,num2str(this_airport),'\',num2str(this_airport),'.txt'));
+else
+    Network = load(strcat(pwd,'/Internal_flights/NETWORK/INT_AggRoutes_timestep/'...
+        ,num2str(this_airport),'/',num2str(this_airport),'.txt'));
+end 
+
 
 %_________________________________________________________________________%
 
@@ -29,6 +55,7 @@ C = sparse(C_temp);
 
 clear A_temp C_temp
 
+% this is only a chech of how sparse they are, not used in practice
 sparsity_A = nnz(A)/length(Network(:,1))^2*100;
 sparsity_C = nnz(C)/(length(Network(:,1))*N_routes)*100;
 
@@ -113,6 +140,7 @@ Db = sparse(horzcat(Db_temp_GH,Db_temp_PR));
 
 clear Da_temp_GH Da_temp_PR Db_temp_GH Db_temp_PR;
 
+% this is only a chech of how sparse they are, not used in practice
 sparsity_Da = nnz(Da)/(length(Network(:,1))*(length(GH(:,1))+length(PR(:,1))))*100;
 sparsity_Db = nnz(Db)/(length(Network(:,1))*(length(GH(:,1))+length(PR(:,1))))*100;
 
@@ -213,28 +241,17 @@ end
 B_nc = sparse(B1_nc_temp+B2_nc_temp);
 
 clear B1_nc_temp B2_nc_temp;
-    
 
+%%## Arnau 2/5/2017 - Whole section INTEGER LINEAR PROGRAM PART //Start
+%% INTEGER LINEAR PROGRAM PART
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% N_s : number of sectors 
+% cMax: (N_t*N_s)x1 vector defining sector capacity at each time. 
+% dMax: (N_t*N_a)x1 vector defining departure capacity at each time. 
+% aMax: (N_t*N_a)x1 vector defining arrival capacity at each time. 
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+% temporarily setting some variables to easy values for testing:
+N_s  = 1;
+cMax = inf(N_s*N_t,1); %no capacity limit 
