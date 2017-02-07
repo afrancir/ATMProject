@@ -16,14 +16,37 @@ clc
 clear all
 close all
 
-AIRPORTS    = load(strcat(pwd,'/AIRPORTS/AIRPORTS_coord.txt'));
+%%## Arnau 2/3/2017 - adaptation for diff. OS //Start
+OSTypeString = {'win' ,'lin'};
+winOrLin = input('Please press "1" for a Windows OS or "2" for a Linux-based OS \n');
+if (winOrLin==1 || winOrLin==2)
+    OS = OSTypeString(winOrLin);
+else 
+    msg ='This is not a valid option. 1 for Win or 2 for Linux';
+    error(msg)
+end 
+
+
+if strcmp(winOrLin,'win')
+    AIRPORTS    = load(strcat(pwd,'\AIRPORTS\AIRPORTS_coord.txt'));
+else
+    AIRPORTS    = load(strcat(pwd,'/AIRPORTS/AIRPORTS_coord.txt'));
+end 
+%%## Arnau 2/3/2017 - adaptation for diff. OS //End
+
 airport_ID = AIRPORTS(:,1);
 
 % Focusing on internal flow from LAX
 this_airport = 34;
 
 % Loading Network
-Network = load(strcat(pwd,'/Internal_flights/NETWORK/INT_AggRoutes_timestep/',num2str(this_airport),'/',num2str(this_airport),'.txt'));
+if strcmp(winOrLin,'win')
+    Network = load(strcat(pwd,'\Internal_flights\NETWORK\INT_AggRoutes_timestep\'...
+        ,num2str(this_airport),'\',num2str(this_airport),'.txt'));
+else
+    Network = load(strcat(pwd,'/Internal_flights/NETWORK/INT_AggRoutes_timestep/'...
+        ,num2str(this_airport),'/',num2str(this_airport),'.txt'));
+end 
 
 %_________________________________________________________________________%
 
@@ -454,36 +477,4 @@ b_ineq = vertcat(b_MC,b_SecCap,b_DepCap,b_NoFlyZones);
 
 %intcon = ones(numel(w),1);
 %X      = intlinprog(w,intcon,A_ineq,b_ineq,[],[],LB,[]);
-
-
-
-
-
-
-
-
-    
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
